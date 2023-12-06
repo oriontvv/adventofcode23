@@ -1,3 +1,4 @@
+use rayon::prelude::*;
 use std::fs::read_to_string;
 
 type Num = usize;
@@ -52,16 +53,17 @@ fn main() {
     println!("min: {min}");
 
     // 2
-    // slowest cheating solution =(
-    // let min = seeds
-    //     .chunks(2)
-    //     .map(|range| {
-    //         (range[0]..(range[0] + range[1]))
-    //             .map(|seed| process_seed(seed, &maps))
-    //             .min()
-    //             .unwrap()
-    //     })
-    //     .min()
-    //     .unwrap();
-    // println!("min: {min}");
+    // rayon's parallelism reduced 30min to 5 min
+    let min = seeds
+        .chunks(2)
+        .map(|range| {
+            (range[0]..(range[0] + range[1]))
+                .into_par_iter()
+                .map(|seed| process_seed(seed, &maps))
+                .min()
+                .unwrap()
+        })
+        .min()
+        .unwrap();
+    println!("min: {min}");
 }
