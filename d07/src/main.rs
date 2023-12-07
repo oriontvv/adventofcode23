@@ -14,14 +14,14 @@ enum HandType {
     FiveKind,
 }
 
-fn match_counts(counts: &Vec<usize>) -> HandType {
+fn match_counts(counts: &[usize]) -> HandType {
     match counts {
-        _ if counts[0] == 5 => HandType::FiveKind,
-        _ if counts[0] == 4 => HandType::FourKind,
-        _ if counts[0] == 3 && counts.len() > 1 && counts[1] == 2 => HandType::FullHouse,
-        _ if counts[0] == 3 => HandType::ThreeKind,
-        _ if counts[0] == 2 && counts.len() > 1 && counts[1] == 2 => HandType::TwoPair,
-        _ if counts[0] == 2 => HandType::OnePair,
+        [5, ..] => HandType::FiveKind,
+        [4, ..] => HandType::FourKind,
+        [3, 2, ..] => HandType::FullHouse,
+        [3, ..] => HandType::ThreeKind,
+        [2, 2, ..] => HandType::TwoPair,
+        [2, ..] => HandType::OnePair,
         _ => HandType::HighCard,
     }
 }
