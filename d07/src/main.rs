@@ -31,17 +31,8 @@ type Bet = usize;
 #[derive(Debug, Clone, PartialEq, Ord, Eq)]
 struct Cards(String);
 
-#[derive(Debug, PartialEq, Ord, Eq)]
+#[derive(Debug, PartialEq, Ord, Eq, PartialOrd)]
 struct Hand(HandType, Cards, Bet);
-
-impl PartialOrd for Hand {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        match self.0.partial_cmp(&other.0) {
-            Some(Ordering::Equal) => self.1.partial_cmp(&other.1),
-            ord => return ord,
-        }
-    }
-}
 
 impl FromStr for Hand {
     type Err = ();
