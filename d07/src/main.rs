@@ -55,10 +55,10 @@ impl FromStr for Hand {
 // 1
 // impl PartialOrd for Cards {
 //     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-//         let cmp = |card: char| "23456789TJQKA".find(card).unwrap();
-//         let values: Vec<_> = self.0.chars().map(cmp).collect();
-//         let other_values: Vec<_> = other.0.chars().map(cmp).collect();
-//         Some(values.cmp(&other_values))
+//         let index = |card: char| "23456789TJQKA".find(card).unwrap();
+//         let values = self.0.chars().map(index);
+//         let other_values = other.0.chars().map(index);
+//         Some(values.cmp(other_values))
 //     }
 // }
 
@@ -74,10 +74,10 @@ impl FromStr for Hand {
 // 2
 impl PartialOrd for Cards {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        let cmp = |card: char| "J23456789TQKA".find(card).unwrap();
-        let values: Vec<_> = self.0.chars().map(cmp).collect();
-        let other_values: Vec<_> = other.0.chars().map(cmp).collect();
-        Some(values.cmp(&other_values))
+        let index = |card: char| "J23456789TQKA".find(card).unwrap();
+        let values = self.0.chars().map(index);
+        let other_values = other.0.chars().map(index);
+        Some(values.cmp(other_values))
     }
 }
 
