@@ -104,12 +104,10 @@ fn main() {
         .map(|line| line.parse().unwrap())
         .collect();
     cards.sort();
-    cards.reverse();
     println!("{cards:?}");
 
     let total: usize = cards
         .iter()
-        .rev()
         .enumerate()
         .map(|(index, hand)| (index + 1) * hand.2)
         .sum();
