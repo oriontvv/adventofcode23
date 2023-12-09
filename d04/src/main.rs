@@ -1,5 +1,4 @@
 use std::collections::HashSet;
-use std::fs::read_to_string;
 
 fn find_numbers(s: &str) -> HashSet<usize> {
     s.split(' ')
@@ -23,19 +22,15 @@ fn calc_cards(common: usize) -> usize {
 
 fn main() {
     // 1
-    let mut total: usize = 0;
-    for line in read_to_string("input").unwrap().lines() {
-        let common = calc_common(line);
-        total += calc_cards(common);
-    }
-    println!("total: {total}");
+    // let mut total: usize = 0;
+    // for line in include_str!("input").lines() {
+    //     let common = calc_common(line);
+    //     total += calc_cards(common);
+    // }
+    // println!("total: {total}");
 
     // 2
-    let cards: Vec<usize> = read_to_string("input")
-        .unwrap()
-        .lines()
-        .map(calc_common)
-        .collect();
+    let cards: Vec<usize> = include_str!("input").lines().map(calc_common).collect();
     // start indexing with 1
     let mut totals = vec![1; cards.len() + 1];
     totals[0] = 0;

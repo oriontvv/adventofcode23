@@ -1,5 +1,3 @@
-use std::fs::read_to_string;
-
 type Num = usize;
 
 fn parse_numbers(s: &str, split_char: char) -> Vec<Num> {
@@ -17,7 +15,7 @@ fn number_of_ways(time: Num, distance: Num) -> Num {
 
 fn main() {
     // 1
-    let input = read_to_string("input").unwrap();
+    let input = include_str!("input");
     let (times, distances) = input.split_once("\n").unwrap();
     let times = parse_numbers(times, ' ');
     let distances = parse_numbers(distances, ' ');
@@ -29,7 +27,7 @@ fn main() {
     println!("answer: {answer}");
 
     // 2
-    let input = read_to_string("input").unwrap().replace(" ", "");
+    let input = include_str!("input").replace(" ", "");
     let (times, distances) = input.split_once("\n").unwrap();
     let times = parse_numbers(times, ':');
     let distances = parse_numbers(distances, ':');

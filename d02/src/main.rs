@@ -1,4 +1,3 @@
-use std::fs::read_to_string;
 use std::str::FromStr;
 
 #[derive(Debug, PartialEq, Eq)]
@@ -80,7 +79,7 @@ mod tests {
 fn main() {
     // 1
     // let mut total: usize = 0;
-    // for line in read_to_string("input").unwrap().lines() {
+    // for line in include_str!("input").lines() {
     //     if let Some((n, true)) = solution_1(line) {
     //         total += n
     //     }
@@ -89,7 +88,7 @@ fn main() {
 
     // 2
     let mut total: usize = 0;
-    for line in read_to_string("input").unwrap().lines() {
+    for line in include_str!("input").lines() {
         if let Some(power) = solution_2(line) {
             total += power
         }

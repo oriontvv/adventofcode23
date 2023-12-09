@@ -1,7 +1,7 @@
 use regex::Regex;
 use std::collections::hash_map::Entry;
 use std::collections::HashSet;
-use std::{cmp::min, collections::HashMap, fs::read_to_string};
+use std::{cmp::min, collections::HashMap};
 
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub struct Number {
@@ -88,7 +88,7 @@ fn find_gears(map: &Vec<&str>) -> GearsMap {
 }
 
 fn main() {
-    let input = read_to_string("input").unwrap();
+    let input = include_str!("input");
     let map: Vec<&str> = input.lines().into_iter().collect();
 
     // 1

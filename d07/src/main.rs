@@ -1,6 +1,5 @@
 use counter::Counter;
 use std::cmp::Ordering;
-use std::fs::read_to_string;
 use std::str::FromStr;
 
 #[derive(Debug, PartialEq, PartialOrd, Eq, Ord)]
@@ -89,8 +88,7 @@ impl From<Cards> for HandType {
 }
 
 fn main() {
-    let mut cards: Vec<Hand> = read_to_string("input")
-        .unwrap()
+    let mut cards: Vec<Hand> = include_str!("input")
         .lines()
         .map(|line| line.parse().unwrap())
         .collect();

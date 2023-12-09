@@ -1,5 +1,3 @@
-use std::fs::read_to_string;
-
 fn calibration(s: &str) -> Option<usize> {
     let numbers: Vec<_> = s
         .matches(char::is_numeric)
@@ -28,7 +26,7 @@ fn calibration_2(s: &str, words: &Vec<&str>) -> Option<usize> {
 fn main() {
     // 1
     // let mut total: usize = 0;
-    // for line in read_to_string("input").unwrap().lines() {
+    // for line in include_str!("input").lines() {
     //     total += calibration(line).unwrap();
     // }
     // println!("total: {total}");
@@ -38,7 +36,7 @@ fn main() {
         "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
     ];
     let mut total: usize = 0;
-    for line in read_to_string("input").unwrap().lines() {
+    for line in include_str!("input").lines() {
         total += calibration_2(line, &words).unwrap();
     }
     println!("total: {total}");

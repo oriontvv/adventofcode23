@@ -1,5 +1,4 @@
 use rayon::prelude::*;
-use std::fs::read_to_string;
 
 type Num = usize;
 type Map = Vec<(Num, Num, Num)>;
@@ -40,7 +39,7 @@ fn process_seed(seed: Num, maps: &Vec<Map>) -> Num {
 }
 
 fn main() {
-    let input = read_to_string("input").unwrap();
+    let input = include_str!("input");
     let (seeds, maps) = input.split_once("\n").unwrap();
     let seeds = parse_numbers(seeds);
     let maps = parse_maps(maps);
