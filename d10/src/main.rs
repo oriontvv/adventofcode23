@@ -1,116 +1,143 @@
-use std::collections::VecDeque;
+use std::collections::{HashMap, HashSet};
 
-type Num = usize;
-type SignedNum = isize;
 type Map = Vec<String>;
+type Num = isize;
 type Pos = (Num, Num);
 
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
-enum PrevPos {
-    #[default]
-    Uninited,
-    Start,
-    Pos(Num, Num),
-}
+const DOWN: Pos = (1, 0);
+const UP: Pos = (-1, 0);
+const LEFT: Pos = (0, -1);
+const RIGHT: Pos = (0, 1);
 
-#[derive(Clone, Debug, Default, PartialEq, Eq)]
-struct Node {
-    prev: PrevPos,
-    color: Num,
-}
+fn find_loop(
+    map: &Map,
+    start: Pos,
+    mut dir: Pos,
+    next: &HashMap<char, Vec<Pos>>,
+) -> Option<(Num, HashSet<Pos>)> {
+    let width = map.len() as isize;
+    let height = map[0].len() as isize;
 
-fn bfs_floodfill(map: &Map) -> usize {
-    let start_pos = find_start(map).expect("No start found");
-    let mut queue = VecDeque::new();
-    queue.push_back(start_pos);
+    let mut visited: HashSet<Pos> = HashSet::new();
+    let mut distance = 0;
+    let (mut x, mut y) = start;
+    let (mut dx, mut dy);
 
-    let height = map.len();
-    let width = map[0].len();
-    let mut nodes = vec![vec![Node::default(); width]; height];
-    nodes[start_pos.0][start_pos.1] = Node {
-        prev: PrevPos::Start,
-        color: 1,
-    };
+    while distance == 0 || (x, y) != start {
+        visited.insert((x, y));
+        (dx, dy) = dir;
+        x += dx;
+        y += dy;
 
-    while !queue.is_empty() {
-        let (y, x) = queue.pop_front().unwrap();
-        let node = &nodes[y][x].clone();
+        if x < 0 || x >= width || y < 0 || y >= height {
+            return None;
+        }
 
-        for (next_y, next_x) in find_neighbours(x, y, map) {
-            let next_node = &nodes[next_y][next_x];
-            if node.prev == PrevPos::Pos(next_y, next_x) {
-                // we've arrived here from this position, don't need to check it again
-                continue;
-            }
-            if next_node.color == 0 {
-                // unvisited
-                nodes[next_y][next_x] = Node {
-                    prev: PrevPos::Pos(y, x),
-                    color: node.color + 1,
-                };
-                queue.push_back((next_y, next_x));
-            } else {
-                // finish. come to visited node - cycle is done
-                return node.color;
+        // move next and keep backtrack
+        dx *= -1;
+        dy *= -1;
+        let ch = map[x as usize].chars().nth(y as usize).unwrap();
+        let next_dirs = next.get(&ch).unwrap();
+        if !next_dirs.contains(&(dx, dy)) {
+            // wrong loop
+            return None;
+        }
+
+        for &next_dir in next_dirs {
+            if next_dir != (dx, dy) {
+                // other one is the correct next direction
+                dir = next_dir;
             }
         }
+        distance += 1;
     }
-    unreachable!()
+
+    Some((distance, visited))
 }
 
 fn find_start(map: &Map) -> Option<Pos> {
-    for (y, row) in map.iter().enumerate() {
-        if let Some(x) = row.find('S') {
-            return Some((y as Num, x as Num));
+    for (x, row) in map.iter().enumerate() {
+        if let Some(y) = row.find('S') {
+            return Some((x as Num, y as Num));
         }
     }
     None
 }
 
-fn find_neighbours(x: Num, y: Num, map: &Map) -> Vec<Pos> {
-    let height = map.len();
-    let width = map[0].len();
+fn solve(map: &Map) -> (Num, Num) {
+    let mut next: HashMap<char, Vec<Pos>> = HashMap::from([
+        ('.', vec![]),
+        ('S', vec![UP, DOWN, RIGHT, LEFT]),
+        ('|', vec![UP, DOWN]),
+        ('-', vec![LEFT, RIGHT]),
+        ('L', vec![UP, RIGHT]),
+        ('J', vec![UP, LEFT]),
+        ('7', vec![DOWN, LEFT]),
+        ('F', vec![DOWN, RIGHT]),
+    ]);
 
-    let mut neighbours = vec![];
-    for (dx, dy) in [(-1isize, 0isize), (1, 0), (0, -1), (0, 1)] {
-        let (next_x, next_y) = (x as SignedNum + dx, y as SignedNum + dy);
-        if let (Some(next_x), Some(next_y)) =
-            (between(next_x, 0, width), between(next_y, 0, height))
-        {
-            if is_connected(map, x, y, dx, dy) && is_connected(map, next_x, next_y, -dx, -dy) {
-                neighbours.push((next_y, next_x));
+    let start = find_start(map).expect("No start found");
+
+    let mut updated_start_dirs = vec![];
+    let mut first = 0;
+    let mut visited = HashSet::new();
+
+    for dir in [UP, DOWN, LEFT, RIGHT] {
+        if let Some((distance, _visited)) = find_loop(map, start, dir, &next) {
+            first = distance / 2;
+            updated_start_dirs.push(dir);
+            visited = _visited;
+        }
+    }
+
+    next.insert('S', updated_start_dirs);
+
+    // 2
+    // highly inspired by reddit discussions and raycast algorithm
+    // https://en.wikipedia.org/wiki/Point_in_polygon#Ray_casting_algorithm
+    let mut second = 0;
+    let mut cur_hand: Option<Pos> = None;
+    for (x, row) in map.iter().enumerate() {
+        let mut inside = false;
+        for (y, ch) in row.chars().enumerate() {
+            let pos = (x as Num, y as Num);
+            if visited.contains(&pos) {
+                let next_dirs = next.get(&ch).unwrap();
+                if next_dirs.contains(&LEFT) && next_dirs.contains(&RIGHT) {
+                    continue;
+                }
+                inside = !inside;
+                if next_dirs.contains(&UP) && next_dirs.contains(&DOWN) {
+                    continue;
+                }
+                let next_hand = find_up_or_down(&next_dirs).unwrap();
+                cur_hand = match cur_hand {
+                    Some(hand) => {
+                        if next_hand != hand {
+                            inside = !inside;
+                        }
+                        None
+                    }
+                    None => Some(next_hand),
+                }
+            } else {
+                if inside {
+                    second += 1;
+                }
             }
         }
     }
-    neighbours
+
+    (first, second)
 }
 
-fn between(value: SignedNum, lower: Num, upper: Num) -> Option<Num> {
-    if value >= (lower as SignedNum) && value < (upper as SignedNum) {
-        Some(value as Num)
-    } else {
-        None
+fn find_up_or_down(next_positions: &Vec<Pos>) -> Option<Pos> {
+    for &dir in next_positions {
+        if dir != LEFT && dir != RIGHT {
+            return Some(dir);
+        }
     }
-}
-fn is_connected(map: &Map, x: Num, y: Num, dx: SignedNum, dy: SignedNum) -> bool {
-    let char = map[y].chars().nth(x).unwrap();
-    match (char, dy, dx) {
-        ('.', _, _) => false,
-        ('S', _, _) => true,
-        ('|', -1, _) => true,
-        ('|', 1, _) => true,
-        ('-', _, -1) => true,
-        ('-', _, 1) => true,
-        ('L', -1, 0) => true,
-        ('L', 0, 1) => true,
-        ('J', -1, 0) => true,
-        ('J', 0, -1) => true,
-        ('7', 1, 0) => true,
-        ('7', 0, -1) => true,
-        ('F', 1, 0) => true,
-        ('F', 0, 1) => true,
-        _ => false,
-    }
+    None
 }
 
 fn main() {
@@ -118,7 +145,6 @@ fn main() {
         .lines()
         .map(|line| line.to_string())
         .collect();
-
-    let first: Num = bfs_floodfill(&map);
-    println!("{first}");
+    let (first, second) = solve(&map);
+    println!("{first}, {second}");
 }
